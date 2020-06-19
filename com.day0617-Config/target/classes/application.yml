@@ -1,0 +1,7 @@
+person:
+  name: IzumiSakai
+  age: 40
+  subjects: {数学: true,语文: false}
+  pets: [dog,cat]
+server:
+  context-path: /path2

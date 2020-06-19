@@ -1,0 +1,32 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.bean.Person",
+      "name": "person",
+      "type": "com.bean.Person"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.bean.Person",
+      "name": "person.age",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.bean.Person",
+      "name": "person.name",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.bean.Person",
+      "name": "person.pets",
+      "type": "java.util.List<java.lang.String>"
+    },
+    {
+      "sourceType": "com.bean.Person",
+      "name": "person.subjects",
+      "type": "java.util.Map<java.lang.String,java.lang.Boolean>"
+    }
+  ]
+}
