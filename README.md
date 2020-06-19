@@ -181,8 +181,8 @@
     
         ```yaml
         friend: 
-        	name: 小明
-        	age: 30
+            name: 小明 
+            age: 30
         	
         friend: {name: IzumiSakai,age: 30}
         ```
@@ -260,7 +260,6 @@
   * 使用位置：主配置类，即包含主方法那个类
   
   * 使用：@ImportSource(location={classpath:bean.xml})
-  
 * ```java
 @Component
   @PropertySource({"classpah:person.properties"})
