@@ -260,21 +260,22 @@
   * 使用位置：主配置类，即包含主方法那个类
   
   * 使用：@ImportSource(location={classpath:bean.xml})
-* ```java
-@Component
-  @PropertySource({"classpah:person.properties"})
-@ConfigurationProperties(prefix="person")
-  public class Person(){
-    @Value("${person.last-name}")
-      private String lastName;
+* 配置类实例
+* 
+  ```java
+    @Component
+    @PropertySource({"classpah:person.properties"})
+    @ConfigurationProperties(prefix="person")
+    public class Person(){
+        @Value("${person.last-name}")
+        private String lastName;
       
-      @Value("#{11*2}")
-      private Integer age;
+        @Value("#{11*2}")
+        private Integer age;
       
-      @Value("true")
-      
-      private Boolean isBoss;
-  }
+        @Value("true")
+        private Boolean isBoss;
+    }
   ```
   
 * springboot推荐使用的配置类
@@ -335,6 +336,3 @@
   * 互补配置可以实现运维时不用重新修改配置重新打包部署，直接命令行指定配置文件位置实现互补
   * 所有配置命令行优先级是最高的
   
-* 自动配置原理
-
-  * 
