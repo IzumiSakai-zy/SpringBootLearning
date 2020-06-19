@@ -336,3 +336,136 @@
   * 互补配置可以实现运维时不用重新修改配置重新打包部署，直接命令行指定配置文件位置实现互补
   * 所有配置命令行优先级是最高的
   
+
+***************
+
+### Web开发
+
+* 总体的三步
+
+  * 创建springboot项目，并导入需要的启动项
+
+  * 在配置文件中指定少量的配置
+
+  * 自己编写业务代码
+  
+* webjar
+
+  * 作用：像引入spring一样引入web相关依赖资源
+
+  * 网址： https://www.webjars.org/
+
+  * 使用：
+
+    * ```xml
+      <dependency>
+          <groupId>org.webjars</groupId>
+          <artifactId>jquery</artifactId>
+          <version>3.3.1</version>
+      </dependency>
+      ```
+  
+* 静态资源映射规则
+
+  * 所有  localhost:8080/webjar/**  的请求都去  classpath:META-INF/resources/webjars/  下找资源
+  * 举例 ：http://localhost:8080/webjars/jquery/3.3.1/jquery.js 可以访问到导入的jQuery源码
+  
+* 静态资源目录映射(classpaht:/代表resources目录)
+  * 四个目录
+    * classpah:/META-INF/resources/
+    * classpath:/resources/
+    * classpath:/static/
+    * /
+  * 当访问 localhost:8080/** 任意资源找不到时就会去上面四个路径下找、
+  * 这也是种目录映射
+  
+* 欢迎页映射
+
+  * localhost:8080/** 任意访问映射到四个静态目录的index.html，没有Index.html则报错
+
+******************
+
+### ThymeLeaf模板引擎
+
+* 导入依赖
+
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+  </dependency>
+  ```
+  
+* 版本太低使用更高版本
+
+  ```xml
+  <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <java.version>1.8</java.version>
+      <thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
+      <!-- 布局功能的支持程序  thymeleaf3主程序  layout2以上版本 -->
+      <!-- thymeleaf2   layout1-->
+      <thymeleaf-layout-dialect.version>2.2.2</thymeleaf-layout-dialect.version>
+  </properties>
+  ```
+  * 其中要注意主版本与布局版本要搭配使用
+  * 这是修改springboot默认自动配置版本的方法
+  
+* 自动配置的目录规则
+
+  * 只要把HTML页面放在 classpath:/templates/ 文件夹下就能自动渲染
+  
+* 正式使用
+
+  * 配置Controller类
+
+    ```java 
+    @org.springframework.stereotype.Controller
+    public class Controller {
+        @RequestMapping("/success")
+        public String success(Map<String,String> map){
+            map.put("name","IzumiSakai");
+            return "success";
+        }
+    }
+    ```
+  ```
+    
+    * 因为是映射到和HTML页面，因此不能加 @ResponseBody注解
+    * 类的注解好像只能加 @Controller ，不能用@Component
+    * 方法的参数可以加东西
+  ```
+  
+* 在 classpath:/templates/下创建success.html页面
+  
+    ```HTML
+    <!DOCTYPE html>
+    <!-- 导入命名空间使有语法提示 -->
+    <html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>success</title>
+    </head>
+    <body>
+        <h1>成功访问</h1>
+        <!--使用thymeleaf语法获取值-->
+        <div th:text="${name}" />
+    </body>
+    </html>
+  ```
+******************
+### thymeleaf语法规则
+
+*  th:**   使用th里的值来替换原生默认的值
+  
+  * 比如： th:id=${id} , th:class=${class} , th:text=${text}
+* ${}   底层就是OGNL表达式
+* th:each 和 [[**]] 的使用    
+
+   * ```html
+     <h2 th:text="${user}" th:each="user:${users}" />
+     
+     <h2 th:each="user:${users}" >[[${user}]]</h2>
+     ```
+   * th:each标签在那个里面，那个就要重复多少次。此例h2标签会重复多次
