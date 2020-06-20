@@ -468,4 +468,208 @@
      
      <h2 th:each="user:${users}" >[[${user}]]</h2>
      ```
+     ```java
+     map.put("array", Arrays.asList("IzumiSakai","ZY","Name"));
+     ```
    * th:each标签在那个里面，那个就要重复多少次。此例h2标签会重复多次
+
+*******************
+
+### SpringMVC自动配置
+
+* springboot已经配置好了springMVC大多数配置
+* 自动配置 ViewResolver（视图解析器） ： 根据方法的返回值生成视图view对象，视图决定如何渲染（转发or重定向）
+* 自动注册 converter（转换器）和formatter（格式化器）；分别用于字符串转java类型和所有类型转字符串
+* springboot自动配置模式
+  * 先看用户没有自己配置一个类，如果有就用用户的，如果没有就由springboot默认配置一个类
+* @AutoWired配置在方法上实际上是在注入参数
+* @EnableWebMvc  全面接管springMVC配置，默认配置全部失效
+
+******************
+
+### Web开始
+
+* 导入资源   entity和dao资源、static下的静态资源、templates下的HTML资源
+
+* 修改默认启动项
+
+  ```java
+  @RequestMapping({"/","/index.html"})
+      public String login(){
+          return "login";
+      }
+  ```
+  
+* 导入webjars的bootstrap依赖并根据映射法使用thymeleaf导入css依赖
+
+  * 注意：@{}不能省
+
+  ```xml
+  <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>bootstrap</artifactId>
+      <version>4.0.0</version>
+  </dependency>
+  ```
+  ```html
+  <link  th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.css}" rel="stylesheet">
+  ```
+
+* bug解决
+
+  * 读取不到templates下的文件   ——  删除target目录重新编译
+  * 最新版的springboot不用修改thymeleaf版本，如果在pom中修改了版本会访问失败
+  * 复制来的login.html有乱码是因为里面有thyleaf表达式，使用默认的就不会乱码
+
+*********************
+
+### 国际化配置
+
+* 在类目录下创建  i18n  的文件夹
+
+* 在  i18n  下创建login.properties、login_zh_CN.properties、logini_en_US.properties文件（idea检查到在配置国际化会自动在上层添加相应的文件夹）
+
+* 进入Resource Bundle视图开始配置
+
+* 在  application.yml  中进行配置(其中 i18n 是自定义在类路径下的包名)
+
+  * 注意是 i18n/login 而不是 i18n.login
+  
+  ```yaml
+  spring:
+    messages:
+      basename: i18n/login
+  ```
+  
+* 使用 #{} 来取值，其中#{}专门用于取这种值
+  
+  ```html
+  <!--th:text="#{tip}"-->
+  <h1 class="h3 mb-3 font-weight-normal" th:text="#{tip}" >Please sign in</h1>
+  
+  <!--th:text="#{password}"-->
+  <label class="sr-only" th:text="#{password}">Password</label>
+  
+  <!--th:placeholder="#{password}"-->
+  <input type="password" name="password" class="form-control" placeholder="Password" th:placeholder="#{password}" required="">
+  
+  <label>
+       <input type="checkbox" value="remember-me"/>[[#{remember}]]
+  </label>
+  ```
+  
+* 修改idea的file encoding 设置，不然properties文件的中文会乱码(修改后properties文件中文会乱码，还要再次编写)
+
+* 把 language=zh_CN  作为请求头传入请求域
+
+  * th:href="@{/index.html(language='zh_CN')}"     其中写地址href使用 @{} 符号，里面（）相当于？，zh_CN作为值要打单引号
+
+  ```html
+  <a class="btn btn-sm" th:href="@{/index.html(language='zh_CN')}">中文</a>
+  <a class="btn btn-sm" th:href="@{/index.html(language='en_US')}">English</a>
+  ```
+  
+* 虽然已经配置好但是springMVC不会使用请求头的 language=zh_CN，还要修改springMVC默认配置
+
+  ```java
+  //实现LocaleResolver接口，这个接口配置的是区域解析器
+  public class MyLocaleResolver implements LocaleResolver {
+      @Override
+      public Locale resolveLocale(HttpServletRequest httpServletRequest) {
+          String language = httpServletRequest.getParameter("language");
+          if (language!=null){
+              String[] strings = language.split("_");
+              //其中zh代表语言，CN代表地区
+              Locale locale=new Locale(strings[0],strings[1]);
+              return locale;
+          }
+          return new Locale("en","US");
+      }
+  
+      @Override
+      public void setLocale(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Locale locale) {}
+  }
+  ```
+
+  
+
+  ```java
+  @Configuration
+  public class MyMvcConfig extends WebMvcConfigurerAdapter {
+      //进行映射
+      @Override
+      public void addViewControllers(ViewControllerRegistry registry) {
+          registry.addViewController("/").setViewName("login");
+      }
+  	
+      //把自己的区域解析器装入spring容器生效
+      @Bean
+      public LocaleResolver localeResolver(){
+          return new MyLocaleResolver();
+      }
+  }
+  ```
+******************
+### 登录
+
+* 在application.yml配置文件中禁用掉thymeleaf的缓存
+
+  ```yaml
+  thymeleaf:
+      cache: false
+  ```
+  
+* 设置form表单的action      th:action="@{/user/login}"
+
+* 编写 /user/login  的业务逻辑
+
+  * 重定向使用   return "redirect:/dashboard.html";
+  
+  ```java
+  @Controller
+  public class LoginController {
+  
+      @RequestMapping(value = "/user/login",method = RequestMethod.POST)
+      public String login(@RequestParam("username") String username,
+                          @RequestParam("password") String password,
+                          Map<String,Object> map){
+  
+          if ("IzumiSakai".equals(username)&&"123456".equals(password))
+              //重定向
+              return "redirect:/dashboard.html";
+          map.put("error","用户名或密码错误");
+          return "login";
+      }
+  }
+  ```
+  
+* 因为使用重定向，因此还要添加  /dashboard.html   到templates文件夹下的dashboard.html的映射
+
+  ```java
+  @RequestMapping("/dashboard.html")
+  public String dashborad(){  return "dashboard";  }
+  ```
+
+* 编写login.html提示的错误信息
+
+  * 其中  #strings 是取用strings的方法
+
+  ```html
+  <div>
+     <label style="color: red" th:if="${error}!=null" th:text="${error}"></label>
+  </div>
+  //第二种写法
+  <label style="color: red" th:if="${not #strings.isEmpty(error)}" th:text="${error}"></label>
+  ```
+  
+* dashboad.html里面要把所有thymeleaf删除了才能使用
+
+* 这样直接可以直接登录后台，不安全，后面会做拦截器
+
+* 服务商
+
+* bug
+
+  * 用户名密码错误跳转导致静态资源不显示——所有静态资源路径前面要加 / 才行
+  * 字符串相等要使用  equal()方法，不能使用 ==
+  * dashboad.html侧边栏无法显示，目前不知是啥问题

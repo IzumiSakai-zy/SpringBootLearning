@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>array</title>
+</head>
+<body>
+    <table>
+        <tr th:text="${name}" th:each="name:${array}"/>
+    </table>
+</body>
+</html>
