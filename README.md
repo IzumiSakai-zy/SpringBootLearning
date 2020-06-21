@@ -666,10 +666,104 @@
 
 * 这样直接可以直接登录后台，不安全，后面会做拦截器
 
-* 服务商
-
 * bug
 
   * 用户名密码错误跳转导致静态资源不显示——所有静态资源路径前面要加 / 才行
   * 字符串相等要使用  equal()方法，不能使用 ==
   * dashboad.html侧边栏无法显示，目前不知是啥问题
+
+*******************
+
+### 拦截器
+
+* 作用：实现访问拦截，必须登录具有合法权限才能访问
+
+* 在自己编写的Controler里面添加session，用于传递username消息
+
+  ```java
+  public String login(@RequestParam("username") String username,
+                      @RequestParam("password") String password,
+                      Map<String,Object> map,
+                      HttpSession session){//添加session参数
+      if ("IzumiSakai".equals(username)&&"123456".equals(password)){
+         session.setAttribute("username",username);
+         return "redirect:/dashboard.html";
+      }
+         map.put("error","用户名或密码错误");
+         return "login";
+  }
+  ```
+
+* 编写一个自己的拦截器
+
+  * 拦截器类必须实现 HandlerInterceptor 接口
+  * 这个接口有三个方法，其中 preHandle  是目标地址跳转之前执行的方法
+* 不拦截返回 true，拦截返回 false
+  
+  ```java
+  public class LoginHandlerInterceptor implements HandlerInterceptor {
+      //目标方法执行之前
+      @Override
+      public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
+          String username = (String) httpServletRequest.getSession().getAttribute("username");
+          if (username!=null){
+              return true;
+          }else {
+              httpServletRequest.setAttribute("error","没有访问权限，请先登录");
+              httpServletRequest.getRequestDispatcher("/").forward(httpServletRequest,httpServletResponse);
+              return false;
+          }
+      }
+  
+      //目标方法执行之后
+      @Override
+      public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+  
+      }
+  
+      @Override
+      public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+  
+      }
+  }
+  ```
+  
+* 把这个过滤器添加到配置类
+
+  * 因为返回值不是对象，就不用@Bean添加进容器
+  * 这个方法是父类 WebMvcConfigurerAdapter 的一个方法
+  * 可以添加那些拦截，那些不拦截
+  * 高版本的springboot还会拦截静态资源，还要做额外拦截
+  * /**   表示拦截所有路径，代表 localhost:8080/**
+
+  ```java
+  @Configuration
+  public class MyMvcConfig extends WebMvcConfigurerAdapter {
+      public void addInterceptors(InterceptorRegistry registry) {
+          super.addInterceptors(registry);
+          //静态资源；  *.css , *.js/SpringBoot已经做好了静态资源映射
+          registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**")
+                  .excludePathPatterns("/index.html","/","/user/login");
+      }
+  }
+  ```
+
+* 以前知识点
+
+  * session可以在一次会话中传递消息   session.setAttribute("username",username);
+  * 转发的语句   httpServletRequest.getRequestDispatcher("/").forward(httpServletRequest,httpServletResponse);
+
+* bug
+
+  * 判断用户名时只用判断是否为空就行   if (username!=null)
+
+*************
+
+### Restful风格CRUD
+
+* 目的：统一URI访问路径风格
+
+* 查询——emp/{id}---GET
+* 添加——emp---POST
+* 修改——emp/{id}---PUT
+* 删除——emp/{id}---DELETE
