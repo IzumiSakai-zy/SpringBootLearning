@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户</title>
+    <link th:href="@{/webjars/bootstrap/4.5.0/css/bootstrap.css}" rel="stylesheet">
+</head>
+<body>
+    <form th:method="post" th:action="@{/user}">
+        <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" name="name" class="form-control" id="name" aria-describedby="请输入姓名">
+        </div>
+        <div >
+            性别
+            <input  name="gender" type="radio" value="1">男
+            <input  name="gender" type="radio" value="0">女
+        </div>
+        <div class="form-group">
+            <label for="age">年龄</label>
+            <input type="text" name="age" class="form-control" id="age" aria-describedby="请输入年龄">
+        </div>
+        <div class="form-group">
+            <label for="birthday">生日</label>
+            <input type="text" name="birthday" class="form-control" id="birthday" aria-describedby="请输入生日">
+        </div>
+        <div>
+            <input type="submit" value="添加">
+        </div>
+    </form>
+</body>
+</html>

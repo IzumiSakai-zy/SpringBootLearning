@@ -1,0 +1,17 @@
+spring:
+  mvc:
+    format:
+      date: yyyy-MM-dd
+    hiddenmethod:
+      filter:
+        enabled: true
+  datasource:
+    username: root
+    password: 542270191MSzyl
+    url: jdbc:mysql://localhost:3306/useraccount?useUnicode=true&characterEncoding=utf8
+
+mybatis:
+  mapper-locations: classpath:mybatis/*.xml
+
+server:
+  port: 80

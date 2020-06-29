@@ -760,10 +760,254 @@
 *************
 
 ### Restful风格CRUD
+* 基础增删改查风格
+  * 目的：统一URI访问路径风格
+  * 查询 —— emp/{id}---GET
+  * 添加 —— emp---POST
+  * 修改 —— emp/{id}---PUT
+  * 删除 —— emp/{id}---DELETE
+* 详细要求
+  * 查询所有 —— emps---GET
+  * 查询某一个(来到修改页面) —— emps/1---GET
+  * 来到添加页面 —— emp---GET
+  * 添加 —— emp---POST
+  * 来到修改页面(进行消息回写) —— emp/1---GET
+  * 修改 —— emp---PUT
+  * 删除 —— emp/1---DELETE
 
-* 目的：统一URI访问路径风格
+****************
 
-* 查询——emp/{id}---GET
-* 添加——emp---POST
-* 修改——emp/{id}---PUT
-* 删除——emp/{id}---DELETE
+### 整合mybatis
+
+* mybatis-spring-boot-stater这种mybatis放在前面的情况说明不是spring官方出的
+
+* 用springboot初始化器创建一个新项目，勾选spring web、thymeleaf、JDBC API、mybatis framework、MySQL driver
+
+* 对照数据库表结构编写一个java bean实体类Account
+
+* 配置yml配置文件
+
+  * 配置 spring.datasource
+
+  * 配置mybati.mapper-location。下例表示mapper文件在类路径下mybatis文件夹下所有xml文件
+
+  * ```yaml
+    server:
+      port: 8080
+    
+    spring:
+      datasource:
+        username: root
+        password: 542270191MSzyl
+        url: jdbc:mysql://localhost:3306/useraccount?useUnicode=true&characterEncoding=utf8
+        driver-class-name: com.mysql.jdbc.Driver
+    mybatis:
+      mapper-locations: classpath:mybatis/*.xml
+    ```
+  
+* 配置dao文件
+
+  * 要添加@Respository和@Mapper注解，放入容器并注明这是mapper
+
+  ```java
+  @Repository
+  @Mapper
+  public interface AccountDao {
+      List<Account> findAll();
+  
+      Account findById(Integer id);
+  
+      void add(Account account);
+  
+      void deleteById(Integer id);
+  
+      void update(Account account);
+  }
+  ```
+
+* 配置mapper.xml文件
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.demo.repository.AccountDao" >
+      <resultMap id="account" type="com.demo.entity.Account">
+          <id property="id" column="id" />
+          <result property="userId" column="user_id" />
+          <result property="money" column="money" />
+      </resultMap>
+      <select id="findAll" resultMap="account">
+          select * from account
+      </select>
+  
+      <select id="findById" resultMap="account" parameterType="java.lang.Integer">
+          select * from account where id=#{id}
+      </select>
+  
+      <insert id="add" parameterType="com.demo.entity.Account" >
+          insert into account (user_id,money) values (#{userId},#{money})
+      </insert>
+  
+      <delete id="deleteById" parameterType="java.lang.Integer" >
+          delete from account where id=#{id}
+      </delete>
+  
+      <update id="update" parameterType="com.demo.entity.Account">
+          update account set user_id=#{userId},money=#{money} where id=#{id}
+      </update>
+  </mapper>
+  ```
+  
+* 在controller类中测试
+
+  * 可以在URL中传入参数
+  
+  ```java
+  @Controller
+  public class AccountController {
+      @Autowired
+      AccountDao accountDao;
+  
+      @ResponseBody
+      @RequestMapping("/findAll")
+      public String findAll(){
+          return accountDao.findAll().toString();
+      }
+  
+      @ResponseBody
+      @RequestMapping("/findById/{id}")
+      public String findById(@PathVariable("id") Integer id){
+          return accountDao.findById(id).toString();
+      }
+  
+      @ResponseBody
+      @RequestMapping("/add")
+      public String add(){
+          Account account=new Account();
+          account.setUserId(2);
+          account.setMoney(2000.0);
+          accountDao.add(account);
+          return "添加成功";
+      }
+  
+      @ResponseBody
+      @RequestMapping("/deleteById/{id}")
+      public String deleteById(@PathVariable("id") Integer id){
+          accountDao.deleteById(id);
+          return "删除成功";
+      }
+  
+      @ResponseBody
+      @RequestMapping("/update")
+      public String update(){
+          Account account=new Account();
+          account.setId(1);
+          account.setUserId(3);
+          account.setMoney(3988.1);
+          accountDao.update(account);
+          return "更新成功";
+      }
+}
+  ```
+********************
+### 手写Web-CURD
+
+* 搭建好基本的框架，导入必要的依赖，详情见上面整合mybatis
+
+* 写Controller（如下所示）
+
+  * 注意方法类型是get，请求域设置参数此处使用Map
+  
+  * ```java
+    @Controller
+    public class AccountController {
+        @Autowired
+        private AccountMapper accountMapper;
+    
+        @RequestMapping(value = "/accounts",method = RequestMethod.GET)
+        public String list(Map<String,Object> map){
+            List<Account> accounts = accountMapper.findAll();
+            System.out.println(accounts.get(0));
+            map.put("accounts",accounts);
+            return "list";
+        }
+    }
+    ```
+  
+* 写HTML（如下所示）
+
+  * 注意遍历的写法
+  * 获得的值要写"[[${account.id}]]"，而不能写"[[${id}]]"
+
+  ```HTML
+  <table>
+      <th>
+          <td>Id</td>
+          <td>用户Id</td>
+          <td>金额</td>
+      </th>
+      <tr th:each="account:${accounts}">
+          <td>[[${account.id}]]</td>
+          <td>[[${account.userId}]]</td>
+          <td>[[${account.money}]]</td>
+      </tr>
+  </table>
+  ```
+  
+* Spring MVC会自动根据HTML返回的参数自动填充Java Bean对象
+
+  ```java
+  @RequestMapping(value = "/user",method = RequestMethod.POST)
+  //自动填充了User对象
+  public String userAdd(User user){
+      userMapper.insert(user);
+      System.out.println("POST方法执行");
+      return "redirect:/users";
+  }
+  ```
+
+* 删除操作HTML页面内容
+
+  * 注意地址的写法" th:action="@{/user/}+${user.id}" "做了一个拼接
+
+  * 因为form和a标签都只支持get和post的请求，其他请求不支持。因此要实现其他的请求方式需要使用到springMVC的配置，通过解析"_method"的属性值来确认请求方式，必须进行表单嵌套，且表单的提交方式必须是post。
+  * 要在application.yml做如下配置"spring.mvc.hiddrenmethod.enabled=true"开启隐藏请求方式配置
+
+  ```HTML
+  <form class="float-left" th:action="@{/user/}+${user.id}" th:method="post">
+      <input type="hidden" name="_method" th:value="delete">
+      <input type="submit" class="btn btn-sm btn-danger" th:value="删除"/>
+  </form>
+  ```
+
+* 从路径上获取参数的方式
+
+  ```java
+  @RequestMapping(value = "/user/{id}",method = RequestMethod.DELETE)
+  public String userDelete(@PathVariable("id") Integer id){}
+  ```
+
+* HTML单选框写法
+
+  * 必须写" th:checked="${user.gender}==true" "，不能写" th:checked="checked" th:if="${user.gender}==true" "。后面这种写法会让后面一个单选框直接消失
+
+  ```HTML
+  <input  name="gender" th:checked="${user.gender}==true" type="radio" value="1">男
+  ```
+
+* 小知识点
+  * 请求域中存值使用"Map, Model, ModelMap"，这几个都可以
+  * 显示性别方法——th:text="${emps.gender}==true? '男' : '女' "
+  * 日期格式化——th:text="${#dates.format(emps.date, 'yyyy-MM-dd')}"  其中#是取用thymeleaf中的内置对象
+  * 重定向——"redirect:/users"，转发——"forward:/users
+  * 默认日期的格式是以"/"作为分隔，如"2000/1/1"，如果不写"/"提交会报错。但是可以在application.yml修改格式，如" spring.mvc.format.date='yyyy-MM-dd' "
+  * Controller的@RequestMapper()可以通过不同的访问方式来区分
+  * Controller中获取HTML返回的参数使用HttpServletRequst类
+  * a标签才能实现跳转，button标签不能跳转
+  * 三元表达式写法——th:text="${user.gender}==true?'男':'女'"（注意大括号是在中间结束而不是在最后）
+  
+* bug
+
+  * HTML页面内"@{}、${}"这种符号一定要有"th:"才能用，不然 " action="@{/main}" "这种写法是错误的

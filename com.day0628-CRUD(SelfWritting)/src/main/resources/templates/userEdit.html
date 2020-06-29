@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户</title>
+    <link th:href="@{/webjars/bootstrap/4.5.0/css/bootstrap.css}" rel="stylesheet">
+</head>
+<body>
+    <form th:action="@{/user}" th:method="post">
+        <input type="hidden" name="_method" value="put">
+        <input type="hidden" name="id" th:value="${user.id}">
+        <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" name="name" th:value="${user.name}" class="form-control" id="name" aria-describedby="请输入姓名">
+        </div>
+        <div class="form-group">
+            性别
+            <input  name="gender" th:checked="${user.gender}==true" type="radio" value="1">男
+            <input  name="gender" th:checked="${user.gender}==false" type="radio" value="0">女
+        </div>
+        <div class="form-group">
+            <label for="age">年龄</label>
+            <input type="text" name="age" th:value="${user.age}" class="form-control" id="age" aria-describedby="请输入年龄">
+        </div>
+        <div class="form-group">
+            <label for="birthday">生日</label>
+            <input type="text" name="birthday" th:value="${#dates.format(user.birthday,'yyy-MM-dd')}" class="form-control" id="birthday" aria-describedby="请输入生日">
+        </div>
+        <div>
+            <input type="submit" value="修改">
+        </div>
+    </form>
+</body>
+</html>

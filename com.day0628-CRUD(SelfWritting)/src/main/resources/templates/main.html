@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>首页面</title>
+    <link th:href="@{/webjars/bootstrap/4.5.0/css/bootstrap.css}" rel="stylesheet">
+</head>
+<body>
+    <a class="button" th:href="@{/accounts}" th:method="get">查询所有账户</a>
+    <a class="button" th:href="@{/users}" th:method="get">查询所有用户</a>
+</body>
+</html>

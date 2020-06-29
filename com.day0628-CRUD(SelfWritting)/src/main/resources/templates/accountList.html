@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>查询所有列表</title>
+    <link th:href="@{/webjars/bootstrap/4.5.0/css/bootstrap.css}" rel="stylesheet">
+</head>
+<body>
+    <table class="table-hover table">
+        <tr>
+            <td>Id</td>
+            <td>用户Id</td>
+            <td>金额</td>
+        </tr>
+        <tr th:each="account:${accounts}">
+            <td>[[${account.id}]]</td>
+            <td>[[${account.userId}]]</td>
+            <td>[[${account.money}]]</td>
+        </tr>
+    </table>
+</body>
+</html>
