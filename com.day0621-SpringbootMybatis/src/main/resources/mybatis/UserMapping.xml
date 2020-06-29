@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.repository.UserDao" >
+<!--    <resultMap id="user" type="com.demo.entity.User" >-->
+<!--        <id property="id" column="id" />-->
+<!--        <result property="name" column="name" />-->
+<!--        <result property="age" column="age" />-->
+<!--        <result property="birthday" column="birthday" />-->
+<!--        <collection property="accounts" column="user_id" ofType="com.demo.entity.Account">-->
+<!--            <id property="id" column="id" />-->
+<!--            <result property="userId" column="user_id" />-->
+<!--            <result property="money" column="money" />-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+<!--    <select id="findAll" resultMap="" />-->
+</mapper>
