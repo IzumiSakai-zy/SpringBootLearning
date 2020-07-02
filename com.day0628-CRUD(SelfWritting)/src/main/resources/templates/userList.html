@@ -10,6 +10,7 @@
     <table class="table table-hover">
         <tr>
             <td th:text="Id"/>
+            <td th:text="序号"/>
             <td th:text="姓名"/>
             <td th:text="性别"/>
             <td th:text="年龄"/>
@@ -17,7 +18,8 @@
             <td th:text="操作"/>
         </tr>
         <tr th:each="user:${users}">
-            <td th:text="${user.id}" />
+            <td th:text="${user.id}"/>
+            <td  th:class="part"/>
             <td th:text="${user.name}" />
             <td th:text="${user.gender}==true?'男':'女'" />
             <td th:text="${user.age}" />
@@ -32,4 +34,14 @@
         </tr>
     </table>
 </body>
+<script>
+    i=0;
+    function func() {
+        tds=document.getElementsByClassName("part");
+        for (j=0;j<tds.length;j++)
+            tds[j].innerHTML= ++i;
+        i=0;
+    }
+    window.onload=func;
+</script>
 </html>
