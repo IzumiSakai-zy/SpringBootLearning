@@ -912,6 +912,43 @@
   }
   ```
 ********************
+### 整合Druid连接池
+
+* 配置文件
+
+  ```yaml
+  spring:
+    datasource:
+      username: root
+      password: 542270191MSzyl
+      url: jdbc:mysql://localhost:3306/mybatis-plus?useUnicode=true&characterEncoding=utf8
+      type: com.alibaba.druid.pool.DruidDataSource
+      druid:
+        initial-size: 5
+        min-idle: 5
+        max-active: 20
+        max-wait: 40000
+        time-between-eviction-runs-millis: 60000
+        min-evictable-idle-time-millis: 30000
+        validation-query: selcet 1 from dual
+        test-while-idle: true
+        test-on-borrow: false
+        test-on-return: false
+        pool-prepared-statements: true
+        
+  mybatis:
+    mapper-locations: classpath:mybatis/*.xml
+    
+  server:
+    port: 80
+    
+  #  <dependency>
+  #        <groupId>org.mybatis.spring.boot</groupId>
+  #        <artifactId>mybatis-spring-boot-starter</artifactId>
+  #         <version>2.1.3</version>
+  #  </dependency>
+  ```
+
 ### 手写Web-CURD
 
 * 搭建好基本的框架，导入必要的依赖，详情见上面整合mybatis
@@ -1011,3 +1048,32 @@
 * bug
 
   * HTML页面内"@{}、${}"这种符号一定要有"th:"才能用，不然 " action="@{/main}" "这种写法是错误的
+
+*********************
+
+### Docker
+
+* 定义：一个开源的应用容器引擎。
+* 核心概念
+  * docker主机(Host)：安装了docker的机器。docker安装与OS之上
+  * docker客户机(Client)：连接docker主机进行操作
+  * docker仓库(Registry)：用于保存各种打包好的软件镜像
+  * docker镜像(Images)：软件打包好的镜像，放在docker仓库中
+  * docker容器(Container)：镜像启动后的实例称为一个容器
+* 使用步骤
+  * 安装docker
+  * 去docker仓库找到目的软件的镜像
+  * 使用docker命令运行这个镜像，这时会产生一个docker容器
+  * 对容器的停止就是对软件的停止
+* 镜像操作
+  * 搜索镜像：docker search [mysql]，如"docker search tomcat"
+  * 拉去镜像：docker pull [mysql:5.6]   冒号后面的是tag版本，不加默认latest。如"docker pull tomcat:8.0.59"
+  * 查看镜像：docker images
+  * 删除镜像：docker rmi 镜像id值  如"docker rmi ox673ded"
+* 容器操作 
+  * 运行容器：docker run --name 自己取个名字 -p 8888:8080 -d [mysql:latest]。 如"docker run --myTomcat -p 8888:8080 -d tomcat:8.0.59"。其中"-d"指后台运行, "-p"是将主机的端口号映射到容器的端口号(主机端口：容器端口)
+  * 查看正在运行的镜像：doker ps
+  * 查看所有容器：docker ps -a
+  * 停止(并没有删除)运行容器：docker stop [容器id | 容器自定义名字]
+  * 启动一个容器：docker start [容器id | 容器自定义名字]
+  * 删除容器(前提必须是容器已经stop)：docker rm  [容器id | 容器自定义名字]
